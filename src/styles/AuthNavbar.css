@@ -1,0 +1,61 @@
+.auth-navbar {
+  width: 60%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-color: transparent;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.auth-navbar .nav-items {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 2rem;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-navbar .nav-items li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-navbar .nav-items li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.auth-navbar .dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.auth-navbar .dropdown img {
+  width: 22px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.auth-navbar .nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.auth-navbar .nav-icons img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.auth-navbar .nav-icons img:hover {
+  transform: scale(1.1);
+} 

@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force scroll reset on all elements */
+html, body, #root {
+  scroll-behavior: auto !important;
+  overflow-x: hidden;
+}
+
+/* Prevent scroll position from being maintained */
+html {
+  scroll-behavior: auto !important;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+body {
+  scroll-behavior: auto !important;
+  overflow-x: hidden;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+#root {
+  scroll-behavior: auto !important;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Force scroll reset on all containers */
+* {
+  scroll-behavior: auto !important;
+}
+
+/* Core scroll reset styles - simplified but effective */
+html {
+  scroll-behavior: auto !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Explicitly set scroll position to top for all containers */
+body {
+  scroll-padding-top: 0;
+  scroll-margin-top: 0;
+}
+
+/* Ensure #root takes full height */
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Prevent scroll anchoring that might keep position */
+* {
+  overflow-anchor: none;
+}
+
+/* Allow scroll anchoring only for specific elements that need it */
+[data-anchor="true"] {
+  overflow-anchor: auto;
+}
+
+/* Force container elements to start at the top */
+main, 
+.container, 
+[class*="container"],
+.auth-page-container,
+.auth-content {
+  scroll-margin-top: 0;
+  scroll-padding-top: 0;
+}
+
+/* Make sure all pages start with sufficient space at the top */
+main, .container, [class*="container"] {
+  padding-top: 2rem;
+}
+
+/* Reset any scroll-behavior properties that might be inherited */
+* {
+  scroll-behavior: auto !important;
+} 

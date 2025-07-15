@@ -1,0 +1,163 @@
+import axios from 'axios';
+import { API_URL } from '../config';
+
+/**
+ * Service for handling virtual session related API calls
+ */
+const virtualSessionService = {
+  /**
+   * Get all virtual sessions for the authenticated user
+   * @returns {Promise<Array>} Array of virtual session objects
+   */
+  getUserVirtualSessions: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/virtual-sessions`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching virtual sessions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get a specific virtual session by ID
+   * @param {string} sessionId - The ID of the virtual session
+   * @returns {Promise<Object>} Virtual session object
+   */
+  getVirtualSessionById: async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/virtual-sessions/${sessionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching virtual session ${sessionId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new virtual session
+   * @param {Object} sessionData - The virtual session data
+   * @returns {Promise<Object>} Created virtual session object
+   */
+  createVirtualSession: async (sessionData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_URL}/virtual-sessions`, sessionData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating virtual session:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update a virtual session
+   * @param {string} sessionId - The ID of the virtual session to update
+   * @param {Object} sessionData - The updated virtual session data
+   * @returns {Promise<Object>} Updated virtual session object
+   */
+  updateVirtualSession: async (sessionId, sessionData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(`${API_URL}/virtual-sessions/${sessionId}`, sessionData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating virtual session ${sessionId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Join a virtual session
+   * @param {string} sessionId - The ID of the virtual session to join
+   * @returns {Promise<Object>} Session connection details
+   */
+  joinVirtualSession: async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/virtual-sessions/${sessionId}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error joining virtual session ${sessionId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * End a virtual session
+   * @param {string} sessionId - The ID of the virtual session to end
+   * @returns {Promise<Object>} Updated session details
+   */
+  endVirtualSession: async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/virtual-sessions/${sessionId}/end`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error ending virtual session ${sessionId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Cancel a scheduled virtual session
+   * @param {string} sessionId - The ID of the virtual session to cancel
+   * @returns {Promise<Object>} Cancellation confirmation
+   */
+  cancelVirtualSession: async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/virtual-sessions/${sessionId}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error canceling virtual session ${sessionId}:`, error);
+      throw error;
+    }
+  }
+};
+
+export default virtualSessionService; 

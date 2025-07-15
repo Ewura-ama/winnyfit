@@ -1,0 +1,1028 @@
+import axios from 'axios';
+import authService from './authService';
+
+const API_URL = 'http://localhost:8000/api/';
+
+// Create an axios instance for sessions
+const sessionAxiosInstance = axios.create({
+    baseURL: `${API_URL}sessions`,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    },
+    timeout: 10000
+});
+
+// Debug the API_URL for troubleshooting
+console.log('API URL configured as:', API_URL);
+
+// Request interceptor for adding auth token
+sessionAxiosInstance.interceptors.request.use(
+    (config) => {
+        try {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                console.error('No user found in localStorage');
+                return config;
+            }
+            
+            let token = null;
+            try {
+                const userData = JSON.parse(userStr);
+                
+                // Try different token locations based on the structure we've seen
+                if (userData.access) {
+                    // Direct access token
+                    token = userData.access;
+                } else if (userData.user && userData.user.access) {
+                    // Nested access token
+                    token = userData.user.access;
+                } else if (userData.token) {
+                    // Legacy format
+                    token = userData.token;
+                }
+                
+                if (!token) {
+                    console.error('No token found in user data', Object.keys(userData));
+                    return config;
+                }
+                
+                // Log the token for debugging (first 10 chars)
+                console.log(`Adding token to ${config.url} request: ${token.substring(0, 10)}...`);
+                
+                // Add token to request headers
+                config.headers['Authorization'] = `Bearer ${token}`;
+                
+                // Log the full URL for debugging
+                console.log('Full request URL:', config.baseURL + config.url);
+                
+                // Log headers for debugging
+                console.log('Full request headers:', config.headers);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+            }
+        } catch (error) {
+            console.error('Error in request interceptor:', error);
+        }
+        return config;
+    },
+    (error) => {
+        console.error('Request interceptor error:', error);
+        return Promise.reject(error);
+    }
+);
+
+// Response interceptor for handling token expiration
+sessionAxiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        
+        // If error is 401 Unauthorized and we haven't retried yet
+        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            console.log('401 error detected, attempting token refresh');
+            
+            try {
+                // Get current user with potential token refresh
+                const user = authService.getCurrentUser();
+                
+                if (!user) {
+                    console.error('No user available for token refresh');
+                    // Redirect to login if no user
+                    window.location.href = '/signin';
+                    return Promise.reject(error);
+                }
+                
+                // Try the request again with the updated token
+                return sessionAxiosInstance(originalRequest);
+            } catch (refreshError) {
+                console.error('Failed to refresh token:', refreshError);
+                // Redirect to login on refresh failure
+                window.location.href = '/signin';
+                return Promise.reject(error);
+            }
+        }
+        
+        return Promise.reject(error);
+    }
+);
+
+// HELPER FUNCTIONS - Define these first so they can be used by other functions
+
+// Helper function to format session types from API
+const formatSessionTypes = (data) => {
+    return data.map(type => ({
+        id: type.id,
+        title: type.name,
+        description: type.description,
+        icon: type.icon || 'dumbbell', // default icon
+        image: type.image || '/assets/images/default-session.jpg',
+        color: type.color || 'blue',
+        duration_options: type.duration_options || [30, 45, 60]
+    }));
+};
+
+// Helper function to format instructors from API
+const formatInstructors = (data) => {
+    return data.map(instructor => ({
+        id: instructor.id,
+        name: `${instructor.first_name} ${instructor.last_name}`,
+        specialization: instructor.specialization || 'Fitness Trainer',
+        image: instructor.image || '/assets/images/default-trainer.jpg',
+        bio: instructor.bio || 'Experienced fitness professional',
+        rating: instructor.rating || 4.5,
+        reviews: instructor.reviews || 0
+    }));
+};
+
+// Helper function to format durations from API
+const formatDurations = (data) => {
+    return data.map(duration => ({
+        id: duration.id,
+        value: duration.minutes,
+        label: `${duration.minutes} minutes`,
+        price: duration.price || 0
+    }));
+};
+
+// Helper function to standardize booking data format from API 
+const standardizeBookingData = (bookings) => {
+  return bookings.map(booking => {
+    // Extract instructor information - handle different API response formats
+    let instructorId = 0;
+    let instructorName = '';
+
+    if (booking.instructor) {
+      // Get ID - handle nested objects
+      instructorId = booking.instructor.id || booking.instructor_id || 0;
+      
+      // Get name - handle different formats
+      if (booking.instructor.name) {
+        instructorName = booking.instructor.name;
+      } else if (booking.instructor.user) {
+        // Handle nested user object
+        const firstName = booking.instructor.user.first_name || '';
+        const lastName = booking.instructor.user.last_name || '';
+        instructorName = `${firstName} ${lastName}`.trim();
+      } else if (booking.instructor.first_name || booking.instructor.last_name) {
+        // Handle flat instructor object
+        const firstName = booking.instructor.first_name || '';
+        const lastName = booking.instructor.last_name || '';
+        instructorName = `${firstName} ${lastName}`.trim();
+      }
+    } else if (booking.instructor_name) {
+      instructorName = booking.instructor_name;
+    }
+
+    // Create a standardized booking object with consistent properties
+    return {
+      id: booking.id,
+      session_type_title: booking.session_type_mode?.session_type?.name || booking.session_type_name || booking.session_type_title || '',
+      session_type_mode: booking.session_type_mode?.id || booking.session_type_mode || 0,
+      mode: booking.session_type_mode?.session_mode?.name || booking.session_mode_name || booking.mode || 'In-Person',
+      duration: booking.duration?.minutes || booking.duration || 0,
+      duration_label: booking.duration?.minutes ? `${booking.duration.minutes} minutes` : `${booking.duration || 0} minutes`,
+      date: booking.date || '',
+      time: booking.time || '',
+      instructor_id: instructorId,
+      instructor_name: instructorName,
+      instructor: booking.instructor, // Preserve original instructor object for detailed access
+      client_id: booking.user?.id || booking.user_id || booking.client_id || 0,
+      client_name: booking.user ? `${booking.user.first_name || ''} ${booking.user.last_name || ''}`.trim() : booking.client_name || '',
+      client_email: booking.user?.email || booking.client_email || '',
+      status: booking.status || 'pending',
+      price: booking.duration?.price || booking.price || 0,
+      created_at: booking.created_at || new Date().toISOString(),
+      updated_at: booking.updated_at || new Date().toISOString()
+    };
+  });
+};
+
+// MOCK DATA
+// Mock session types
+const mockSessionTypes = [
+  {
+    id: 1,
+    type: 'strength',
+    title: 'Strength Training',
+    description: 'Build muscle, increase metabolism, and improve overall fitness with our comprehensive strength training classes.',
+    imageRef: '../assets/gallery-1.png',
+    modes: ['In-Person', 'Virtual'],
+  },
+  {
+    id: 2,
+    type: 'yoga',
+    title: 'Yoga Class',
+    description: 'Find balance, flexibility and inner peace with our various yoga styles suitable for all experience levels.',
+    imageRef: '../assets/gallery-2.png',
+    modes: ['In-Person', 'Virtual'],
+  },
+  {
+    id: 3,
+    type: 'hiit',
+    title: 'HIIT Workout',
+    description: 'High-Intensity Interval Training for maximum calorie burn and cardiovascular benefits in minimal time.',
+    imageRef: '../assets/gallery-3.png',
+    modes: ['In-Person', 'Virtual'],
+  },
+  {
+    id: 4,
+    type: 'combat',
+    title: 'Combat Sports',
+    description: 'Learn self-defense techniques while getting a full-body workout with our mixed martial arts and boxing classes.',
+    imageRef: '../assets/gallery-4.png',
+    modes: ['In-Person'],
+  },
+  {
+    id: 5,
+    type: 'aerobics',
+    title: 'Aerobics Class',
+    description: 'Improve cardiovascular health and coordination with our fun and energetic aerobics sessions.',
+    imageRef: '../assets/gallery-5.png',
+    modes: ['In-Person', 'Virtual'],
+  }
+];
+
+// Mock instructors
+const mockInstructors = [
+  {
+    id: 1,
+    name: 'Alexo',
+    specialization: 'Personal Training',
+    image: '../assets/trainer-1.png',
+    rating: 4.8,
+    reviews: 127,
+    availability: {
+      monday: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+      wednesday: ['10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'],
+      friday: ['8:00 AM', '10:00 AM', '12:00 PM', '3:00 PM']
+    }
+  },
+  {
+    id: 2,
+    name: 'Gladys',
+    specialization: 'Group Fitness Classes',
+    image: '../assets/trainer-2.png',
+    rating: 4.9,
+    reviews: 213,
+    availability: {
+      tuesday: ['8:00 AM', '10:00 AM', '1:00 PM', '3:00 PM'],
+      thursday: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+      saturday: ['9:00 AM', '11:00 AM', '2:00 PM']
+    }
+  },
+  {
+    id: 3,
+    name: 'Ray TBN',
+    specialization: 'Strength & Conditioning',
+    image: '../assets/trainer-3.png',
+    rating: 4.7,
+    reviews: 98,
+    availability: {
+      monday: ['8:00 AM', '12:00 PM', '2:00 PM', '6:00 PM'],
+      wednesday: ['9:00 AM', '1:00 PM', '4:00 PM'],
+      friday: ['10:00 AM', '2:00 PM', '5:00 PM']
+    }
+  },
+  {
+    id: 4,
+    name: 'Okordie',
+    specialization: 'Weight Loss Coaching',
+    image: '../assets/trainer-4.png',
+    rating: 4.6,
+    reviews: 76,
+    availability: {
+      tuesday: ['9:00 AM', '12:00 PM', '3:00 PM', '5:00 PM'],
+      thursday: ['8:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+      saturday: ['10:00 AM', '1:00 PM', '3:00 PM']
+    }
+  },
+  {
+    id: 5,
+    name: 'Willy',
+    specialization: 'Rehabilitation Training',
+    image: '../assets/trainer-5.jpg',
+    rating: 4.5,
+    reviews: 64,
+    availability: {
+      monday: ['10:00 AM', '1:00 PM', '4:00 PM'],
+      wednesday: ['9:00 AM', '12:00 PM', '3:00 PM'],
+      friday: ['8:00 AM', '11:00 AM', '2:00 PM']
+    }
+  }
+];
+
+// Mock durations with pricing for each mode
+const mockDurations = [
+  {
+    id: 1,
+    value: 30,
+    label: '30 minutes',
+    pricing: {
+      'In-Person': 15,
+      'Virtual': 12
+    }
+  },
+  {
+    id: 2,
+    value: 45,
+    label: '45 minutes',
+    pricing: {
+      'In-Person': 22,
+      'Virtual': 18
+    }
+  },
+  {
+    id: 3,
+    value: 60,
+    label: '60 minutes',
+    pricing: {
+      'In-Person': 30,
+      'Virtual': 25
+    }
+  },
+  {
+    id: 4,
+    value: 90,
+    label: '90 minutes',
+    pricing: {
+      'In-Person': 45,
+      'Virtual': 35
+    }
+  }
+];
+
+// Updated to use Cedis (₵)
+const mockUserSessions = [
+    {
+        id: 1,
+        session_type_title: 'Strength Training',
+        duration_label: '45 minutes',
+        date: '2023-07-15',
+        time: '10:00 AM',
+        instructor_name: 'Ray TBN',
+        status: 'confirmed',
+        price: 180
+    },
+    {
+        id: 2,
+        session_type_title: 'Yoga Flow',
+        duration_label: '60 minutes',
+        date: '2023-07-18',
+        time: '9:00 AM',
+        instructor_name: 'Gladys',
+        status: 'pending',
+        price: 250
+    },
+    {
+        id: 3,
+        session_type_title: 'Cardio Blast',
+        duration_label: '30 minutes',
+        date: '2023-07-10',
+        time: '5:30 PM',
+        instructor_name: 'Alexo',
+        status: 'completed',
+        price: 120
+    }
+];
+
+// Mock instructor bookings for development
+const mockInstructorBookings = [
+  {
+    id: 101,
+    session_type_mode: 1,
+    session_type_title: 'Strength Training',
+    instructor_id: 1,
+    instructor_name: 'Alexo',
+    client_id: 5,
+    client_name: 'John Doe',
+    client_email: 'john@example.com',
+    duration: 45,
+    date: '2023-11-15',
+    time: '10:00 AM',
+    status: 'confirmed',
+    price: 180
+  },
+  {
+    id: 102,
+    session_type_mode: 2,
+    session_type_title: 'Yoga Class',
+    instructor_id: 1,
+    instructor_name: 'Alexo',
+    client_id: 6,
+    client_name: 'Jane Smith',
+    client_email: 'jane@example.com',
+    duration: 60,
+    date: '2023-11-16',
+    time: '2:00 PM',
+    status: 'pending',
+    price: 250
+  },
+  {
+    id: 103,
+    session_type_mode: 1,
+    session_type_title: 'HIIT Workout',
+    instructor_id: 1,
+    instructor_name: 'Alexo',
+    client_id: 7,
+    client_name: 'Bob Johnson',
+    client_email: 'bob@example.com',
+    duration: 30,
+    date: '2023-11-17',
+    time: '9:00 AM',
+    status: 'confirmed',
+    price: 120
+  }
+];
+
+// FUNCTION DEFINITIONS - Define all exported functions here first
+// Simulate API call to get session types
+export const getSessionTypes = async () => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Ensure each session type has all required fields
+  return mockSessionTypes.map(type => ({
+    id: type.id,
+    type: type.type,
+    title: type.title,
+    description: type.description,
+    imageRef: type.imageRef,
+    modes: type.modes || ['In-Person']
+  }));
+};
+
+// Get instructors filtered by session type and mode
+export const getInstructorsBySessionType = async (typeId, mode) => {
+  console.log("Fetching instructors with typeId:", typeId, "and mode:", mode);
+  
+  // Handle null values
+  if (!typeId) {
+    console.log("No typeId specified, returning empty array");
+    return [];
+  }
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 700));
+  
+  // Get session type to check specialization
+  const sessionType = mockSessionTypes.find(type => type.id === typeId);
+  
+  if (!sessionType) {
+    console.log("No session type found with id:", typeId);
+    return mockInstructors; // Return all instructors if type not found
+  }
+  
+  console.log("Found session type:", sessionType);
+  
+  // For simplicity, let's just return all instructors for now
+  // instead of filtering by specialization
+  return mockInstructors;
+};
+
+// Get durations for a specific session type and instructor
+export const getDurationsBySessionTypeAndInstructor = async (typeId, instructorId, mode) => {
+  // Handle null values
+  if (!typeId || !instructorId || !mode) {
+    return [];
+  }
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 600));
+  
+  // Add mode-specific pricing to each duration
+  return mockDurations.map(duration => ({
+    ...duration,
+    price: duration.pricing[mode] || 0 // Get price for the selected mode
+  }));
+};
+
+// Add a new function to get durations by session type and mode only
+// This will allow showing durations before an instructor is selected
+export const getDurationsBySessionType = async (sessionTypeId, mode) => {
+  try {
+    // In a real app, this would be an API call
+    // For demo, return mock data based on session type and mode
+    
+    // Wait for a small delay to simulate API call
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return duration options based on mode
+    if (mode === 'Virtual') {
+      return [
+        { id: 1, value: 30, label: '30 minutes', price: 12 },
+        { id: 2, value: 45, label: '45 minutes', price: 18 },
+        { id: 3, value: 60, label: '1 hour', price: 25 }
+      ];
+    } else {
+      return [
+        { id: 4, value: 30, label: '30 minutes', price: 15 },
+        { id: 5, value: 45, label: '45 minutes', price: 22 },
+        { id: 6, value: 60, label: '1 hour', price: 30 },
+        { id: 7, value: 90, label: '1.5 hours', price: 45 }
+      ];
+    }
+  } catch (error) {
+    console.error('Error fetching durations:', error);
+    throw new Error('Failed to load durations');
+  }
+};
+
+// Get all bookings and filter client-side
+export const getAllBookings = async () => {
+    try {
+        console.log('Getting all bookings');
+        
+        const url = `/bookings/`;
+        // Use proper URL joining to avoid double slashes in URL
+        const fullUrl = API_URL.endsWith('/') ? `${API_URL}bookings/` : `${API_URL}/bookings/`;
+        console.log(`Making API call to: ${fullUrl}`);
+        
+        // Use the sessionAxiosInstance which has the interceptor for adding auth tokens
+        const response = await sessionAxiosInstance.get(url);
+        
+        // Handle paginated response format
+        const data = response.data;
+        console.log('All bookings API response:', data);
+        
+        // Return the response data as-is (paginated or not)
+        return data;
+    } catch (error) {
+        console.error('Error fetching all bookings:', error);
+        
+        // Print detailed error information
+        if (error.response) {
+            console.error('API error response for all bookings:', {
+                status: error.response.status,
+                statusText: error.response.statusText,
+                data: error.response.data
+            });
+        }
+        
+        throw error;
+    }
+};
+
+// CREATE THE SERVICE OBJECT
+const sessionService = {
+    // Get all session types
+    getSessionTypes: async () => {
+        try {
+            const response = await sessionAxiosInstance.get('/types/');
+            return formatSessionTypes(response.data);
+        } catch (error) {
+            console.error('Error fetching session types:', error);
+            throw error;
+        }
+    },
+
+    // Get all instructors
+    getInstructors: async () => {
+        try {
+            const response = await sessionAxiosInstance.get('/instructors/');
+            return formatInstructors(response.data);
+        } catch (error) {
+            console.error('Error fetching instructors:', error);
+            throw error;
+        }
+    },
+
+    // Get available durations
+    getSessionDurations: async () => {
+        try {
+            const response = await sessionAxiosInstance.get('/durations/');
+            return formatDurations(response.data);
+        } catch (error) {
+            console.error('Error fetching durations:', error);
+            throw error;
+        }
+    },
+
+    // Alias for getSessionDurations for backward compatibility
+    getDurations: async () => {
+        return sessionService.getSessionDurations();
+    },
+
+    // Get available time slots for a specific date and instructor
+    getTimeSlots: async (date, instructorId) => {
+        try {
+            const response = await sessionAxiosInstance.get(`/timeslots/?date=${date}&instructor=${instructorId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching time slots:', error);
+            throw error;
+        }
+    },
+
+    // Book a session
+    bookSession: async (sessionData) => {
+        try {
+            console.log('Booking session with data:', sessionData);
+            
+            // Format data correctly according to the API requirements
+            const formattedData = {
+                instructor: parseInt(sessionData.instructorId, 10),
+                session_type_mode: parseInt(sessionData.sessionTypeMode, 10),
+                // Use one of the valid duration IDs from the database (1, 2, 3)
+                // If we have a higher ID (4-7 from the frontend), we need to map it
+            duration: Math.min(parseInt(sessionData.durationId, 10), 3),
+                date: sessionData.date,
+                time: sessionData.time,
+                notes: sessionData.notes || ''
+            };
+            
+            // Debug output
+            console.log('Mapped duration ID:', formattedData.duration);
+            
+            // Add payment information directly if provided
+            if (sessionData.paymentMethod) {
+                formattedData.payment_method = sessionData.paymentMethod;
+                formattedData.payment_amount = sessionData.paymentAmount;
+                formattedData.phone_number = sessionData.phoneNumber;
+            }
+            
+            console.log('Formatted booking data for API:', formattedData);
+            
+            // Make the API call
+            const url = `/bookings/`;
+            const response = await sessionAxiosInstance.post(url, formattedData);
+            
+            console.log('Booking API response:', response.data);
+            
+            // Return the standardized booking data
+            return response.data;
+        } catch (error) {
+            console.error('Error booking session:', error);
+            
+            // Log the error details for debugging
+            if (error.response) {
+                console.error('Error response:', error.response.data);
+                console.error('Error status:', error.response.status);
+            }
+            
+            throw error;
+        }
+    },
+
+    // Helper function to map duration IDs from frontend to backend
+    // The backend has durations with IDs 1, 2, 3 for 30, 45, 60 minutes
+    // The frontend may have different IDs (4-7)
+    mapDurationId: function(durationId) {
+        // Based on API inspection, valid IDs are 1 (30min), 2 (45min), and 3 (60min)
+        if (durationId <= 3) {
+            // IDs 1, 2, 3 can be used directly
+            return durationId;
+        }
+        
+        // Map frontend IDs to backend IDs
+        switch (durationId) {
+            case 4: // 30min (In-Person)
+                return 1; // 30min
+            case 5: // 45min (In-Person)
+                return 2; // 45min
+            case 6: // 60min (In-Person)
+                return 3; // 60min
+            case 7: // 90min (In-Person)
+                return 3; // use 60min as fallback since no 90min option in API
+            default:
+                console.warn(`Unknown duration ID: ${durationId}, falling back to 60min (ID=3)`);
+                return 3; // default to 60min
+        }
+    },
+
+    // Book session with payment details (simplified approach)
+    bookSessionWithPayment: async (sessionData, paymentMethod, amount) => {
+        try {
+            console.log('Booking session with direct payment');
+            
+            // Add payment details to session data
+            const bookingData = {
+                ...sessionData,
+                paymentMethod: paymentMethod,
+                paymentAmount: amount
+            };
+            
+            // Book session with payment information included
+            return await sessionService.bookSession(bookingData);
+        } catch (error) {
+            console.error('Error in bookSessionWithPayment:', error);
+            throw error;
+        }
+    },
+
+    // Get sessions for the current user
+    getUserSessions: async (userId) => {
+        try {
+            // If userId is not provided, try to get it from localStorage
+            if (!userId) {
+                console.log('No userId provided, trying to get from localStorage');
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    try {
+                        const userData = JSON.parse(userStr);
+                        userId = userData?.id || userData?.user?.id;
+                        console.log(`Got userId from localStorage: ${userId}`);
+                    } catch (e) {
+                        console.error('Error parsing user from localStorage:', e);
+                    }
+                }
+                
+                // If still no userId, throw error
+                if (!userId) {
+                    throw new Error('No user ID available for fetching sessions');
+                }
+            }
+            
+            console.log(`Fetching sessions for user ID: ${userId}`);
+            
+            const url = `/bookings/?user=${userId}`;
+            // Use proper URL joining to avoid double slashes in URL
+            const fullUrl = API_URL.endsWith('/') ? `${API_URL}bookings/?user=${userId}` : `${API_URL}/bookings/?user=${userId}`;
+            console.log(`Making API call to: ${fullUrl}`);
+            
+            const response = await sessionAxiosInstance.get(url);
+            
+            // Check response format - handle both paginated and direct array responses
+            const data = response.data;
+            console.log('User sessions API response:', data);
+            
+            // Extract the sessions array, handling pagination
+            let sessions = Array.isArray(data) ? data : (data.results || []);
+            
+            // Add client-side filter to ensure only the current user's sessions are included
+            // This handles cases where the backend API doesn't filter correctly
+            sessions = sessions.filter(session => {
+                const sessionUserId = session.user?.id || session.user_id;
+                return sessionUserId == userId; // Use loose equality to handle string/number differences
+            });
+            
+            console.log(`After client-side filtering: ${sessions.length} sessions for user ${userId}`);
+            
+            // Standardize the booking data
+            const standardizedSessions = standardizeBookingData(sessions);
+            console.log('Standardized sessions:', standardizedSessions);
+            
+            // Return the standardized sessions with proper pagination structure if needed
+            return Array.isArray(data) 
+                ? standardizedSessions 
+                : { ...data, results: standardizedSessions };
+        } catch (error) {
+            console.error('Error fetching user sessions:', error);
+            
+            // Print detailed error information
+            if (error.response) {
+                console.error('API error response:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data
+                });
+            }
+            
+            throw error;
+        }
+    },
+    
+    // Cancel a booked session
+    cancelSession: async (sessionId) => {
+        try {
+            // Using the pattern of /sessions/bookings/ endpoints
+            const response = await sessionAxiosInstance.post(`/bookings/${sessionId}/cancel/`);
+            console.log('Session cancellation response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error cancelling session:', error);
+            
+            // Log detailed error response if available
+            if (error.response) {
+                console.error('API error response for cancellation:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data
+                });
+            }
+            
+            throw error;
+        }
+    },
+    
+    // We're now handling payment with the booking call directly
+    // This method is kept for reference/backward compatibility but is not used
+    processPayment: async (paymentData) => {
+        console.log('Payment processing is now handled with the booking API');
+        console.log('Payment data received:', paymentData);
+        // Just return a success response since actual payment will be handled by the booking API
+            return {
+                success: true,
+            message: 'Payment will be processed with booking'
+        };
+    },
+
+    // Generate a receipt for a session
+    generateReceipt: async (sessionId) => {
+        try {
+            console.log('Generating receipt for session:', sessionId);
+            
+            // Make API call to generate a receipt
+            const response = await sessionAxiosInstance.get(`/payments/receipt/${sessionId}/`, {
+                responseType: 'blob'
+            });
+            
+            console.log('Receipt API response received');
+            
+            // Return the blob response from the API
+            return response.data;
+        } catch (error) {
+            console.error('Receipt generation error:', error);
+            throw new Error(error.message || 'Failed to generate receipt');
+        }
+    },
+
+    // Get instructor bookings
+    getInstructorBookings: async (instructorId) => {
+        if (!instructorId) {
+            throw new Error('No instructor ID provided to getInstructorBookings');
+        }
+        
+        try {
+            console.log(`Fetching bookings for instructor ID: ${instructorId}`);
+            
+            const url = `/bookings/instructor/?id=${instructorId}`;
+            // Use proper URL joining to avoid double slashes in URL
+            const fullUrl = API_URL.endsWith('/') ? `${API_URL}bookings/instructor/?id=${instructorId}` : `${API_URL}/bookings/instructor/?id=${instructorId}`;
+            console.log(`Making API call to: ${fullUrl}`);
+            
+            // Use the sessionAxiosInstance which has the interceptor for adding auth tokens
+            const response = await sessionAxiosInstance.get(url);
+            
+            // Check response format - handle both paginated and direct array responses
+            const data = response.data;
+            console.log('Instructor bookings API response:', data);
+            
+            // Return the response as is - component will handle different formats
+            return data;
+        } catch (error) {
+            console.error('Error fetching instructor bookings:', error);
+            
+            // Print detailed error information
+            if (error.response) {
+                console.error('API error response:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+            }
+            
+            throw error;
+        }
+    },
+
+    updateBookingStatus: async (bookingId, newStatus) => {
+        try {
+            console.log(`Updating booking ${bookingId} to status ${newStatus}`);
+            
+            // Get the current user for authentication
+            const user = authService.getCurrentUser();
+            
+            if (!user) {
+                console.error('No authenticated user found for updating booking status');
+                throw new Error('Authentication required');
+            }
+            
+            let response;
+            let apiUrl;
+            let requestMethod;
+            let requestData = null;
+            
+            // Determine the appropriate API endpoint and method based on status
+            if (newStatus === 'completed') {
+                apiUrl = `/bookings/${bookingId}/complete/`;
+                requestMethod = 'post';
+            } else if (newStatus === 'cancelled') {
+                apiUrl = `/bookings/${bookingId}/cancel/`;
+                requestMethod = 'post';
+            } else {
+                apiUrl = `/bookings/${bookingId}/`;
+                requestMethod = 'patch';
+                requestData = { status: newStatus };
+            }
+            
+            // Attempt primary method
+            try {
+                console.log(`Using ${requestMethod.toUpperCase()} to ${apiUrl} for booking ${bookingId}`);
+                if (requestMethod === 'post') {
+                    response = await sessionAxiosInstance.post(apiUrl);
+                } else {
+                    response = await sessionAxiosInstance.patch(apiUrl, requestData);
+                }
+            } catch (primaryError) {
+                console.error(`Primary method failed: ${primaryError.message}`);
+                
+                // Fall back to PATCH if the specialized endpoints fail
+                if (requestMethod === 'post') {
+                    console.log(`Falling back to PATCH for booking ${bookingId}`);
+                    response = await sessionAxiosInstance.patch(`/bookings/${bookingId}/`, { 
+                        status: newStatus 
+                    });
+                } else {
+                    // If the fallback also fails, throw the original error
+                    throw primaryError;
+                }
+            }
+            
+            console.log(`Status update response for booking ${bookingId}:`, response.data);
+            
+            // Extract the updated booking from the response
+            let updatedBooking;
+            
+            if (response.data) {
+                if (response.data.id) {
+                    // Full booking object returned
+                    updatedBooking = response.data;
+                } else if (response.data.detail) {
+                    // Just a success message returned
+                    console.log(`Success message: ${response.data.detail}`);
+                    // Create a booking object with the new status
+                    updatedBooking = { id: bookingId, status: newStatus };
+    } else {
+                    // Unknown response format
+                    console.warn('Unknown response format from status update:', response.data);
+                    updatedBooking = { id: bookingId, status: newStatus };
+                }
+            } else {
+                console.warn('Empty response data from status update');
+                updatedBooking = { id: bookingId, status: newStatus };
+            }
+            
+            // Ensure the booking has the expected status
+            if (updatedBooking.status !== newStatus) {
+                console.warn(`API returned status ${updatedBooking.status || 'undefined'} when ${newStatus} was requested`);
+                
+                // Create a complete booking object with the updated status
+                updatedBooking = {
+                    ...updatedBooking,
+                    status: newStatus,
+                    _forceStatus: true // Mark that we had to force the status
+                };
+            }
+            
+            console.log(`Final booking object with status ${updatedBooking.status}:`, updatedBooking);
+            
+            // Dispatch an event so other components can update their state
+            const event = new CustomEvent('bookingUpdated', {
+                detail: {
+                    bookingId,
+                    newStatus,
+                    booking: updatedBooking
+                }
+            });
+            
+            window.dispatchEvent(event);
+            
+            return updatedBooking;
+    } catch (error) {
+            console.error(`Error updating booking ${bookingId} status:`, error);
+        
+            // Extract and enhance error message
+            let errorMessage = 'Failed to update booking status';
+            
+        if (error.response) {
+                console.error('API error details:', {
+                status: error.response.status,
+                data: error.response.data
+            });
+                
+                // Check for detailed error message from API
+                if (error.response.data && error.response.data.detail) {
+                    errorMessage = error.response.data.detail;
+                } else if (error.response.status === 400) {
+                    if (newStatus === 'completed') {
+                        errorMessage = 'This session cannot be completed - it may need to be confirmed first';
+                    } else if (newStatus === 'cancelled') {
+                        errorMessage = 'This session cannot be cancelled - it may already be completed';
+                    }
+                } else if (error.response.status === 404) {
+                    errorMessage = 'Booking not found - it may have been deleted';
+                } else if (error.response.status === 403) {
+                    errorMessage = 'You do not have permission to update this booking';
+                }
+            }
+            
+            // Create an enhanced error object with the descriptive message
+            const enhancedError = new Error(errorMessage);
+            enhancedError.originalError = error;
+            throw enhancedError;
+        }
+    }
+};
+
+// Add these functions to the sessionService object
+// Now that they've been properly defined earlier
+sessionService.getSessionTypes = getSessionTypes;
+sessionService.getInstructorsBySessionType = getInstructorsBySessionType;
+sessionService.getDurationsBySessionTypeAndInstructor = getDurationsBySessionTypeAndInstructor;
+sessionService.getDurationsBySessionType = getDurationsBySessionType;
+sessionService.getAllBookings = getAllBookings;
+
+export default sessionService; 
