@@ -16,29 +16,29 @@ function Hero() {
   // };
   
   return (
-    <section className="relative pt-20 overflow-hidden w-full min-h-screen">
+    <section className="relative w-full" style={{"height": "fit-content", marginTop: "15vh", marginBottom: "5rem"}}>
       {/* Background with gradient */}
       <div 
         className="absolute top-0 left-0 w-full h-full" 
         style={{
-          transform: 'skewY(-5deg)',
           transformOrigin: 'top right',
           background: 'linear-gradient(to bottom right,rgb(178, 184, 226), #F5F6FF)',
         }}
       />
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-center min-h-[80vh]">
-          <div className="w-full md:w-1/2 order-2 md:order-1">
+      <div className="container mx-auto px-4 relative z-10" style={{height: "100%"}}>
+        <div className="flex flex-row md:flex-row items-start justify-center" style={{"min-height": "85vh"}}>
+          <div style={{width: "60%"}}>
             <img 
               src={HeroImage} 
               alt="Fitness in action" 
-              className="w-full max-w-md mx-auto md:max-w-full h-auto object-contain"
+              
+              style={{height: "650px", objectFit: "contain", width: "100%"}}
             />
           </div>
-          <div className="w-full lg:w-1/2 text-center lg:text-left z-10 order-1 lg:order-2 lg:pl-12">
+          <div style={{width: "40%", padding: "3rem 0", marginLeft: "-4rem"}}>
             <div className="animate-fadeIn">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 hover:transform hover:scale-105 transition-transform duration-300">
+              <h1 className="text-4xl italic md:text-6xl font-bold mb-10 hover:transform hover:scale-105 transition-transform duration-300">
                 SPEAK <br/>
                 FITNESS
                 <br />
@@ -49,7 +49,7 @@ function Hero() {
               
               <Link 
                 // to={user ? "/book-session" : "#"}
-                to={"#"}
+                to={"/signin"}
                 // onClick={handleBookClick}
                 className="px-8 py-4 bg-red-600 text-white font-bold rounded-lg text-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
               >

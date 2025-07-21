@@ -117,7 +117,7 @@ function Testimonials() {
   const currentTestimonial = testimonialData[currentIndex];
 
   return (
-    <section className="py-16">
+    <section className="py-16 p-8">
       <div className="max-w-7xl mx-auto px-4 ml-20 -mt-20">
         <h2 className="text-3xl font-bold mb-12 italic">Testimonials</h2>
         <div 

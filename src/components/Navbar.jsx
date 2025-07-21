@@ -87,7 +87,7 @@ function Navbar() {
 
   // Full navbar for main pages
   return (
-    <nav className="fixed top-0 w-full bg-white z-50 shadow-sm">
+    <nav className="fixed top-0 w-full bg-white z-50 shadow-sm p-2" style={{height: "15vh"}}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
@@ -99,7 +99,7 @@ function Navbar() {
               />
             </Link>
           </div>
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="md:flex items-center space-x-8">
             <Link to="/" className="text-gray-800 hover:text-red-600">Home</Link>
             <Link to="/classes" className="text-gray-800 hover:text-red-600">Classes</Link>
             <Link to="/trainers" className="text-gray-800 hover:text-red-600">Trainers</Link>
@@ -173,7 +173,7 @@ function Navbar() {
             ) : (
               <div className="flex items-center space-x-4">
                 <Link to="/signin" className="text-gray-800 hover:text-red-600">Sign In</Link>
-                <Link to="/instructor-login" className="text-gray-800 hover:text-red-600">Instructor Login</Link>
+                {/* <Link to="/instructor-login" className="text-gray-800 hover:text-red-600">Instructor Login</Link> */}
                 <Link to="/signup" className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">
                   {isHomePage ? 'Join Membership' : 'Sign Up'}
                 </Link>

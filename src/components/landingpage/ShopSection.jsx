@@ -91,7 +91,7 @@ const ShopSection = () => {
           <a href="#" className="text-blue-500 hover:text-blue-600 transition-colors">View All</a>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {products.map((product) => (
             <div key={product.id} className="flex flex-col items-center">
               {/* Product Image with Hover Effect */}
@@ -122,7 +122,7 @@ const ShopSection = () => {
                     -
                   </button>
                   <span className="px-4">
-                    {getQuantity(product.id) > 0 ? getQuantity(product.id) : ''}
+                    {getQuantity(product.id) > 0 ? getQuantity(product.id) : '0'}
                   </span>
                   <button 
                     className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition-colors"

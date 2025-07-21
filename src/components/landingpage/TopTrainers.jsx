@@ -33,10 +33,10 @@ function TopTrainers() {
   ];
 
   return (
-    <section className="py-16">
+    <section className="py-16 p-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-xl sm:text-2xl font-bold mb-8">Top Trainers</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {trainers.map((trainer) => (
             <div key={trainer.id} className="text-center">
               <div className="overflow-hidden rounded-3xl mb-4">

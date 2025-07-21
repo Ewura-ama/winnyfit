@@ -90,7 +90,7 @@ const LatestClasses = () => {
                     className="w-full h-[400px] rounded-xl shadow-lg object-cover transition-transform duration-300 hover:shadow-2xl"
                   />
                   {/* Enhanced Hover overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
+                  <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center" style={{background: "#0000005e"}}>
                     <span className="text-white text-lg font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
                       View Class Details →
                     </span>

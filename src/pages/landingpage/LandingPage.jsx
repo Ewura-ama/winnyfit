@@ -7,13 +7,15 @@ import ShopSection from '../../components/landingpage/ShopSection';
 import BMICalculator from '../../components/landingpage/BMICalculator';
 import TopTrainers from '../../components/landingpage/TopTrainers';
 import Testimonials from '../../components/landingpage/Testimonials';
-import PageWrapper from '../../components/landingpage/PageWrapper';
+
 import Footer from '../../components/Footer';
+import Navbar from '../../components/Navbar';
 
 export default function LandingPage(){
     return (
         <>
-        <PageWrapper>
+        <div style={{border: '1px solid red'}}>
+            <Navbar/>
             <Hero />
             <FitnessSection/>
             <HealthGallery/>
@@ -22,7 +24,7 @@ export default function LandingPage(){
             <BMICalculator/>
             <TopTrainers/>
             <Testimonials/>
-        </PageWrapper>
+        </div>
         <Footer/>
         </>
     )

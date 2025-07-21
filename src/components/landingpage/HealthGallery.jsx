@@ -61,7 +61,7 @@ function HealthGallery() {
           <div className="flex justify-between items-start">
             <div className="max-w-xl">
               <p className="text-red-600 font-medium mb-2">Our Classes</p>
-              <h2 className="text-4xl font-bold">
+              <h2 className="text-3xl italic md:text-4xl lg:text-5xl font-bold">
                 HEALTH IS A
                 <br />
                 PRIORITY HERE
@@ -95,7 +95,7 @@ function HealthGallery() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {classes.map((item) => (
             <div key={item.id} className="flex flex-col">
               <div className="relative overflow-hidden rounded-lg mb-3">
