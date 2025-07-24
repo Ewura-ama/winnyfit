@@ -293,8 +293,50 @@ export default function Booking() {
 
             {currentStep === 4 && (
                 <div className="success-screen">
-                    <h2>Success!</h2>
-                    <p>Your session has been booked successfully.</p>
+                    <h2>Session Confirmed</h2>
+                    <p>Your session has been booked and confirmed. Please check-in with your trainer on time.</p>
+                    <div className="action-btns">
+                        <a href="#" className="calendar-btn">Add to Calendar</a>
+                        <a href="#" className="download-receipt">Download Receipt</a>
+                    </div>
+                    <div className="session-details">
+                        <h3>Session Details</h3>
+                        <div className="first-section">
+                            <div className="session-id">
+                                <small>Session ID</small>
+                                <span>#123456</span>
+                            </div>
+
+                            <div className="session-type">
+                                <small>Session Type</small>
+                                <span>In-Person</span>
+                            </div>
+                        </div>
+                        <div className="second-section">
+                            <div className="date">
+                                <small>Date</small>
+                                <span>Tuesday, July 7, 2023</span>
+                            </div>
+                            <div className="time">
+                                <small>Time</small>
+                                <span>11:00 AM</span>
+                            </div>
+                            <div className="location">
+                                <small>Location</small>
+                                <span>Fitness Studio</span>
+                            </div>
+                        </div>
+                        <div className="trainer-details">
+                            <div className="avatar">
+                                <img src={Ellipse13} alt="" />
+                            </div>
+                            <div className="details">
+                                <h4>Samantha Jones</h4>
+                                <p>Specializes in strength training, weight loss, and injury prevention. Certified personal trainer with 10 years of experience.</p>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             )}
         </div>

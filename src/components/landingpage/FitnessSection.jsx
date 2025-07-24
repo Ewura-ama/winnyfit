@@ -22,7 +22,7 @@ function FitnessSection() {
         <div className="flex flex-row md:flex-row items-center justify-between gap-2">
           {/* Animated Text Content */}
           <div style={{width: "60%"}} className="md:w-1/3 flex flex-col items-center text-center md:text-left -mt-10 mb-6 md:mb-0 md:pr-0 md:pl-12 animate-slideIn">
-            <p className="text-red-600 font-medium mb-3 hover:text-red-500 transition-colors">Welcome To CapFit</p>
+            <p className="text-red-600 font-medium mb-3 hover:text-red-500 transition-colors">Welcome To WinnyFit</p>
             <h2 className="text-3xl italic md:text-4xl lg:text-5xl font-bold leading-tight mb-4 hover:transform hover:scale-105 transition-transform duration-300">
               FOCUS ON YOUR
               <br />
