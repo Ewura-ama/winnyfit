@@ -8,7 +8,7 @@ import Classes from '../../components/classes/Classes';
 export default function ClassesPage(){
     return (
         <>
-        <div style={{border: '1px solid red'}}>
+        <div>
             <Navbar/>
             <Hero />
             <Classes />

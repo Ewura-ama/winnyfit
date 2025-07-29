@@ -96,14 +96,14 @@ function Navbar() {
                 src={logo}
                 alt="CAPFIT" 
                 className="h-16 w-auto"
+                
               />
             </Link>
           </div>
-          <div className="md:flex items-center space-x-8">
+          <div className="md:flex items-center space-x-8" style={{gap: "1rem"}}>
             <Link to="/" className="text-gray-800 hover:text-red-600">Home</Link>
             <Link to="/classes" className="text-gray-800 hover:text-red-600">Classes</Link>
             <Link to="/trainers" className="text-gray-800 hover:text-red-600">Trainers</Link>
-            <Link to="/about" className="text-gray-800 hover:text-red-600">About Us</Link>
             <Link to="/products" className="text-gray-800 hover:text-red-600">Products</Link>
             
             {/* Dashboard link - only shown when logged in */}
@@ -171,7 +171,7 @@ function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-8">
                 <Link to="/signin" className="text-gray-800 hover:text-red-600">Sign In</Link>
                 {/* <Link to="/instructor-login" className="text-gray-800 hover:text-red-600">Instructor Login</Link> */}
                 <Link to="/signup" className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">
