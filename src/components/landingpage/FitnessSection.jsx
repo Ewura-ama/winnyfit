@@ -1,27 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import fitnessSection from '../../assets/fitness-section.png';
-
+import '../../styles/FitnessSection.css';
 function FitnessSection() {
   return (
-    <section className="relative overflow-visible bg-black text-white -mt-20">
+    <section className="fitness-section relative bg-black text-white">
       {/* Animated slanted background */}
       <div 
-        className="absolute bottom-0 left-0 w-full bg-white transition-all duration-500 hover:h-[160px]"
-        style={{
-          transformOrigin: 'bottom left',
-          borderColor: 'transparent',
-          height: "120px",
-          zIndex: 0,
-          clipPath: 'polygon(0 60%, 100% 0, 100% 100%, 0 100%)',
-       
-        }}
+        className="slanted-bg"
+        
       />
       
       <div className="container mx-auto px-4 relative z-10 pb-4" >
         <div className="flex flex-row md:flex-row items-center justify-between gap-2">
           {/* Animated Text Content */}
-          <div style={{width: "60%"}} className="md:w-1/3 flex flex-col items-center text-center md:text-left -mt-10 mb-6 md:mb-0 md:pr-0 md:pl-12 animate-slideIn">
+          <div style={{width: "60%"}} className="md:w-1/3 flex flex-col items-center text-center md:text-left  mb-6 md:mb-0 md:pr-0 md:pl-12 animate-slideIn h-full" >
             <p className="text-red-600 font-medium mb-3 hover:text-red-500 transition-colors">Welcome To WinnyFit</p>
             <h2 className="text-3xl italic md:text-4xl lg:text-5xl font-bold leading-tight mb-4 hover:transform hover:scale-105 transition-transform duration-300">
               FOCUS ON YOUR

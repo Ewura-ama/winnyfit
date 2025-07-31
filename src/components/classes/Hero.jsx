@@ -16,7 +16,7 @@ function Hero() {
   // };
   
   return (
-    <section className="relative w-full" style={{"height": "fit-content", marginTop: "15vh", marginBottom: "5rem"}}>
+    <section className="relative w-full" style={{"height": "fit-content", marginTop: "10vh"}}>
       {/* Background with gradient */}
       <div 
         className="absolute top-0 left-0 w-full h-full" 
@@ -26,17 +26,17 @@ function Hero() {
         }}
       />
       
-      <div className="container mx-auto px-4 relative z-10" style={{height: "100%"}}>
-        <div className="flex flex-row md:flex-row items-start justify-center" style={{"min-height": "85vh"}}>
-          <div style={{width: "55%"}}>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="flex flex-row md:flex-row items-start justify-center hero-box">
+          <div className="hero-image">
             <img 
               src={athleteImg} 
               alt="Fitness in action" 
               
-              style={{height: "650px", objectFit: "contain", width: "100%"}}
+              
             />
           </div>
-          <div style={{width: "45%", padding: "3rem 0", marginLeft: "-4rem"}}>
+          <div className="hero-content">
             <div className="animate-fadeIn">
               <h1 className="text-3xl italic md:text-6xl font-bold mb-10 hover:transform hover:scale-105 transition-transform duration-300">
                 PUSH YOUR <br/>

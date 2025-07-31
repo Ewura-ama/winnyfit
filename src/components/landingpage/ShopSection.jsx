@@ -91,7 +91,7 @@ const ShopSection = () => {
           <a href="#" className="text-blue-500 hover:text-blue-600 transition-colors">View All</a>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
           {products.map((product) => (
             <div key={product.id} className="flex flex-col items-center">
               {/* Product Image with Hover Effect */}

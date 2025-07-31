@@ -82,7 +82,7 @@ const LatestClasses = () => {
               key={currentClass.id}
             >
               {/* Image Section */}
-              <div className="w-1/3 relative hover:transform hover:-translate-y-2 transition-transform duration-300">
+              <div className="lg:w-1/3 sm:w-1/2 relative hover:transform hover:-translate-y-2 transition-transform duration-300" >
                 <div className="mt-8 relative animate-slideIn">
                   <img
                     src={currentClass.image}
@@ -130,11 +130,11 @@ const LatestClasses = () => {
               </div>
               
               {/* Content Section */}
-              <div className="w-2/3 text-black py-12 self-end">
-                <h3 className="text-5xl font-bold italic mb-4">{currentClass.title}</h3>
+              <div className="lg:w-2/3 sm:w-1/2 text-black py-12 self-end">
+                <h3 className="text-3xl lg:text-5xl font-bold italic mb-4">{currentClass.title}</h3>
                 <div className="text-5xl font-bold mb-4 flex items-start">
                   <span className="text-4xl font-medium mt-2">₵</span>
-                  <h3 className="text-7xl font-bold mb-3">
+                  <h3 className="text-3xl lg:text-7xl font-bold mb-3">
                     {currentClass.price}
                   </h3>
                   <div className="text-xl font-bold ml-2 mt-3 flex flex-col">

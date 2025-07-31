@@ -95,7 +95,7 @@ function HealthGallery() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {classes.map((item) => (
             <div key={item.id} className="flex flex-col">
               <div className="relative overflow-hidden rounded-lg mb-3">
@@ -105,9 +105,9 @@ function HealthGallery() {
                   className="w-full aspect-[3/4] object-cover transition-transform duration-300 hover:scale-105"
                 />
               </div>
-              <h3 className="text-center font-bold text-xl">
+              <h4 className="text-center font-bold">
                 {item.name}
-              </h3>
+              </h4>
             </div>
           ))}
         </div>

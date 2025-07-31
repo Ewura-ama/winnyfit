@@ -73,6 +73,44 @@
         }
       }
     }
+    @media screen and (max-width: 768px) {
+      padding: 1% 0;
+      .class-card{
+        width: 100%;
+       
+        .card-img{
+          width: 30%;
+          img{
+            height: 100px;
+          }
+        }
+        .card-details{
+          width: 70%;
+          p{
+            font-size: 1rem;
+          }
+          div{
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            span{
+              padding: .2rem 1rem;
+              font-size: 12px;
+              &.active-type{
+                background: #17A1FA;
+                border-radius: 5px;
+              }
+            }
+          }
+          .book-btn{
+            padding: .3rem 1.5rem;
+            font-size: .8rem;
+            margin-left: unset;
+          }
+        }
+      }
+      
+    }
   }
 }
 
