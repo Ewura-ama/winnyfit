@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { navigateTo } from '../utils/navigation';
 import logo from '../assets/logo.png';
-import "./navbar.css"; 
+import "./Navbar.css"; 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();

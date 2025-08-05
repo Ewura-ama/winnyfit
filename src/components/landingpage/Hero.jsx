@@ -23,6 +23,7 @@ function Hero() {
         style={{
           transformOrigin: 'top right',
           background: 'linear-gradient(to bottom right,rgb(178, 184, 226), #F5F6FF)',
+          
         }}
       />
       
@@ -51,7 +52,7 @@ function Hero() {
                 // to={user ? "/book-session" : "#"}
                 to={"/booking"}
                 // onClick={handleBookClick}
-                className="px-8 py-4 bg-red-600 text-white font-bold rounded-lg text-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                className="px-8 py-4 bg-red-600 text-white font-bold rounded-lg text-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-300 shadow-lg border-red"
               >
                 Book a Session
               </Link>

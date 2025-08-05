@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import axios from "axios";
 import "../../styles/Auth.css";
 import "../../styles/SignUp.css";
 import logo from "../../assets/logo.png";
@@ -9,18 +9,17 @@ import googleLogo from "../../assets/Google.png";
 import appleLogo from "../../assets/Apple.png";
 import microsoftLogo from "../../assets/Microsoft.png";
 import PageWrapper from '../../components/PageWrapper';
-
+import backIcon from "../../assets/back-icon.png"; // Assuming you have a back icon
 const SignUp = () => {
   const navigate = useNavigate();
   // const { register } = useAuth();
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
     password2: "",
     first_name: "",
     last_name: "",
-    role: "member",
+    
     phone_number: "",
     agreeToTerms: false
   });
@@ -35,9 +34,12 @@ const SignUp = () => {
     }));
   };
 
+  const [successMessage, setSuccessMessage] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
 
     if (formData.password !== formData.password2) {
       setError("Passwords do not match");
@@ -50,31 +52,53 @@ const SignUp = () => {
     }
 
     setLoading(true);
+    const finalData = {
+      user: {
+          email: formData.email,
+          password: formData.password,
+          firstname: formData.first_name,
+          lastname: formData.last_name
+        },
+        contact_number: formData.phone_number
+    }
+    console.log(finalData)
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/customers/register/`, 
+        finalData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+  });
 
-    // try {
-    //   // Filter out fields not needed by backend API
-    //   const userData = {
-    //     email: formData.email,
-    //     password: formData.password,
-    //     password2: formData.password2,
-    //     first_name: formData.first_name,
-    //     last_name: formData.last_name
-    //   };
+      setSuccessMessage("User created successfully! Redirecting to login...");
       
-    //   // Optional fields
-    //   if (formData.phone_number) {
-    //     userData.phone_number = formData.phone_number;
-    //   }
-      
-    //   console.log('Submitting user data:', userData);
-    //   await register(userData);
-    //   navigate("/signin"); // Redirect to sign in after successful registration
-    // } catch (err) {
-    //   setError(err.message || "Failed to create an account");
-    // } finally {
-    //   setLoading(false);
-    // }
-  };
+      setTimeout(() => {
+        navigate("/signin");
+      }, 3000);
+
+    } catch (err) {
+    if (err.response && err.response.data) {
+      // Check if the response data has a detail or field-specific error
+      if (typeof err.response.data === 'string') {
+        setError(err.response.data);
+      } else if (err.response.data.detail) {
+        setError(err.response.data.detail);
+      } else {
+        // Format field-specific errors into a readable string
+        const errorMessages = Object.entries(err.response.data)
+          .map(([field, messages]) => `${messages.join(', ')}`)
+          .join('\n');
+        setError(errorMessages);
+      }
+    } else {
+      setError(err.message || "Registration failed");
+    }
+    } finally {
+      setLoading(false);
+    }
+};
+
+
 
   return (
     <PageWrapper>
@@ -96,33 +120,15 @@ const SignUp = () => {
 
               {/* Right Section */}
               <div className="signup-right">
+                <a href="/" className="back-btn">
+                    <img src={backIcon} alt="Back" />
+                    Back to Home
+                </a>
                 <h2 className="signup-title">Sign-up</h2>
+                {successMessage && <div className="success-message">{successMessage}</div>}
                 {error && <div className="error-message">{error}</div>}
+
                 <form className="signup-form" onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label>Username*</label>
-                    <input 
-                      type="text"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="Enter your username"
-                      className="form-input"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Email*</label>
-                    <input 
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      className="form-input"
-                      required
-                    />
-                  </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label>First Name*</label>
@@ -149,6 +155,19 @@ const SignUp = () => {
                       />
                     </div>
                   </div>
+                  <div className="form-group">
+                    <label>Email*</label>
+                    <input 
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  
                   <div className="form-group">
                     <label>Phone Number</label>
                     <input 

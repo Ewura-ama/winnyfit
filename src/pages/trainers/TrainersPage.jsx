@@ -6,7 +6,7 @@ import trainer4 from '../../assets/trainer-4.png';
 import trainer5 from '../../assets/trainer-5.jpg';
 import facebook from '../../assets/facebook.png';
 import instagram from '../../assets/instagram.png';
-import x from '../../assets/x.png';
+import x from '../../assets/X.png';
 import whatsapp from '../../assets/whatsapp.png';
 import PageWrapper from '../../components/PageWrapper';
 import Navbar from '../../components/Navbar';

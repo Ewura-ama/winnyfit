@@ -14,7 +14,7 @@ import Navbar from '../../components/Navbar';
 export default function LandingPage(){
     return (
         <>
-        <div style={{border: '1px solid red'}}>
+        <div>
             <Navbar/>
             <Hero />
             <FitnessSection/>

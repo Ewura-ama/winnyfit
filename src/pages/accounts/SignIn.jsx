@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import axios from "axios";
 import "../../styles/Auth.css";
 import "../../styles/SignIn.css";
 import logo from "../../assets/logo.png";
@@ -9,38 +9,79 @@ import Google from "../../assets/Google.png";
 import appleLogo from "../../assets/Apple.png";
 import Microsoft from "../../assets/Microsoft.png";
 import PageWrapper from '../../components/PageWrapper';
+import backIcon from "../../assets/back-icon.png";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // const { login } = useAuth();
-  const { login } = {email: "ameyeduwaa@gmail.com", role: "instructor"}
-  const navigate = useNavigate();
-  const location = useLocation();
+  
+  const navigate = useNavigate(); // Initialize navigate
 
-  // Check if we were redirected from another page
-  const from = location.state?.from || "/";
-  const message = location.state?.message || null;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      setIsLoading(false);
-      return;
+  // Check if user is authenticated
+  useEffect(() => {
+    // Check localStorage or context for authentication state
+    const token = localStorage.getItem('token'); // Adjust based on your auth implementation
+    if (token) {
+      navigate('/'); // Redirect to dashboard if token exists
     }
+  }, [navigate]);
 
+  
+  
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
+    return cookieValue ? cookieValue.split('=')[1] : null;
+  };
+  
+  // axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
-    } catch (error) {
-      console.error("Sign in error:", error);
-      setError(error.message || "Failed to sign in. Please try again.");
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/signin/`, {
+        email,
+        password,
+      });
+     
+
+      localStorage.setItem('token', response.data.token); // Adjust based on the response structure
+      setMessage('Signin successful!');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 3000);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        // Check if it's a plain string error
+        if (typeof err.response.data === 'string') {
+          setError(err.response.data);
+        } 
+        // Check for DRF-style "detail" error
+        else if (err.response.data.detail) {
+          setError(err.response.data.detail);
+        } 
+        // Handle field-specific errors
+        else {
+          const errorMessages = Object.entries(err.response.data)
+            .map(([field, messages]) => {
+              if (Array.isArray(messages)) {
+                return `${field}: ${messages.join(', ')}`;
+              } else {
+                return `${field}: ${messages}`;
+              }
+            })
+            .join('\n');
+          
+          setError(errorMessages); // ✅ This was missing
+        }
+      } else {
+        setError(err.message || "Registration failed");
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -64,9 +105,13 @@ const SignIn = () => {
                 </div>
                 
                 <div className="signin-right">
+                  <a href="/" className="back-btn">
+                    <img src={backIcon} alt="Back" />
+                    Back to Home
+                  </a>
                   <h2 className="signin-title">Sign In</h2>
                   <p className="signin-subtitle">
-                    Welcome back! Please enter your details.
+                    Welcome! Please enter your details.
                   </p>
 
                   {error && (

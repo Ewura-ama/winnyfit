@@ -92,6 +92,25 @@
   display: none;
 }
 
+.back-btn{
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: transparent;
+  color: #E7000B; /* Match the button color */
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: underline;
+  display: flex;
+  
+  img{
+    width: 25px;
+    height: 25px;
+    margin-right: 0.5rem;
+  }
+}
+
 .signin-title {
   color: red;
   margin-bottom: 1rem;
@@ -136,11 +155,13 @@
 .remember-me {
   font-size: 0.9rem;
   color: #555;
+  display: flex;
+  gap: .5rem;
 }
 
 .forgot-password {
   font-size: 0.9rem;
-  color: red;
+  color: #E7000B;
   text-decoration: none;
 }
 
@@ -151,7 +172,7 @@
 .signin-button {
   width: 100%;
   padding: 0.75rem;
-  background: #FF5722 !important; /* Force orange background */
+  background: #E7000B !important; /* Force orange background */
   color: #FFFFFF !important; /* Force white text */
   border: none;
   border-radius: 14px;
@@ -167,7 +188,7 @@
 }
 
 .signin-button:hover {
-  background: #E64A19 !important; /* Force darker orange on hover */
+  background: #ff000d !important; /* Force darker orange on hover */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -204,7 +225,7 @@
 }
 
 .signup-link {
-  color: red;
+  color: #E7000B;
   text-decoration: none;
   font-weight: 700;
   font-size: 1.1rem;
@@ -248,6 +269,9 @@
   object-fit: contain;
 }
 
+.signin-subtitle{
+  margin: 1rem 0;
+}
 /* Error message styling */
 .signin-error {
   background-color: #fef2f2;
@@ -260,8 +284,8 @@
 }
 
 .signin-message {
-  background-color: #f0f9ff;
-  color: #0369a1;
+  background-color: #2f855a36;
+  color: #2f855a;
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 1rem;
