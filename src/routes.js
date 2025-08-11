@@ -14,6 +14,7 @@ const Products = lazy(() => import('./pages/products/ProductsPage'))
 const ProductDetail = lazy(() => import('./pages/products/ProductDetail'))
 const Cart = lazy(() => import('./pages/cart/Cart'))
 const Checkout = lazy(() => import('./pages/checkout/Checkout'))
+const DashboardPage = lazy(() => import('./pages/dashboard/Dashboard'))
 const routes = [
     { path: '/', component: Landingpage},
     { path: '/signin', component: SignIn},
@@ -26,7 +27,8 @@ const routes = [
     { path: 'products/', component: Products},
     { path: 'product/:productName', component: ProductDetail},
     { path: 'cart/', component: Cart},
-    { path: 'checkout/', component: Checkout}
+    { path: 'checkout/', component: Checkout},
+    { path: 'dashboard/', component: DashboardPage}
 ]
 
 export default routes;

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import useAuth  from '../context/AuthContext';
 import { navigateTo } from '../utils/navigation';
 import logo from '../assets/logo.png';
 import "./Navbar.css"; 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  // const { user, logout } = useAuth();
-  const { user, logout } = {email: "hydrus", role: "instructor"};
+  const { user, logout } = useAuth();
+  
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const isHomePage = location.pathname === '/';
-  const isAuthPage = ['/signin', '/signup'].includes(location.pathname);
+  
 
   // Update cart count from localStorage whenever it changes
   useEffect(() => {
@@ -49,51 +49,20 @@ function Navbar() {
   };
 
   // Show different dashboard based on user role
-  const userRole = user?.role || user?.user?.role;
-  const userName = user?.name || user?.first_name || user?.user?.first_name || user?.email || user?.user?.email || 'User';
+  const userRole = user?.role;
+  const userName = user?.firstname  || user?.email;;
 
-  // Simplified navbar for auth pages
-  if (isAuthPage) {
-    return (
-      <nav className="fixed top-0 w-full bg-white z-50 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex-shrink-0">
-              <Link to="/">
-                <img 
-                  src={logo}
-                  alt="CAPFIT" 
-                  className="h-16 w-auto"
-                />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-6">
-              <Link to="/" className="text-gray-800 hover:text-red-600">Home</Link>
-              {location.pathname === '/signin' ? (
-                <Link to="/signup" className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">
-                  Sign Up
-                </Link>
-              ) : (
-                <Link to="/signin" className="text-gray-800 hover:text-red-600">
-                  Sign In
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
+  
+  
   // Full navbar for main pages
   return (
-  <nav className="fixed top-0 w-full bg-white z-50 shadow-sm p-2">
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between h-16">
+  <nav className="navbar fixed top-0 w-full bg-white z-50 shadow-sm px-4">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 w-full" >
+      <div className="flex items-center justify-between">
         {/* Logo */}
-        <div className="flex-shrink-0">
+        <div className="logo">
           <Link to="/">
-            <img src={logo} alt="CAPFIT" className="h-16 w-auto" />
+            <img src={logo} alt="CAPFIT" className="w-auto" />
           </Link>
         </div>
 
@@ -133,21 +102,9 @@ function Navbar() {
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                   <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
-                  {userRole === 'instructor' || userRole === 'admin' ? (
-                    <Link to="/instructor-dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Instructor Dashboard
-                    </Link>
-                  ) : (
-                    <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      User Dashboard
-                    </Link>
-                  )}
+                  
                   <Link to="/my-classes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Classes</Link>
-                  {userRole !== 'instructor' && userRole !== 'admin' && (
-                    <Link to="/instructor-login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Instructor Portal
-                    </Link>
-                  )}
+                  
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
