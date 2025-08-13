@@ -52,7 +52,7 @@ const SignIn = () => {
       localStorage.setItem('token', response.data.token); // Adjust based on the response structure
       setMessage('Signin successful!');
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }, 3000);
     } catch (err) {
       if (err.response && err.response.data) {
