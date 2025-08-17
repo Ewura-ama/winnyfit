@@ -37,17 +37,7 @@ export default function useAuth(){
         return;
       }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/me`,
-        {},
-        {
-          headers: {
-            Authorization: `Token ${token}`, // Include token in the Authorization header
-          },
-        }
-      );
-
-      console.log('Sign out response:', response); // Log response for debugging
+       // Log response for debugging
       localStorage.removeItem('token'); // Remove token from local storage
       navigate('/signin'); // Redirect to sign-in page
     } catch (error) {

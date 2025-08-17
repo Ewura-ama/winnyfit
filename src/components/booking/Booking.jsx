@@ -22,23 +22,31 @@ export default function Booking() {
     const [selectedDate, setSelectedDate] = useState(getTodayDate());
     const [currentStep, setCurrentStep] = useState(1);
 
-    const instructors = [
-        {
-            name: "Nasif Yusuf",
-            durations: ["30 minutes", "120 minutes", "60 minutes"],
-            availableTimes: ["9:00 AM", "9:30 AM", "10:00 AM"]
-        },
-        {
-            name: "Vincent Akyea",
-            durations: ["45 minutes", "60 minutes"],
-            availableTimes: ["9:00 AM", "7:00 AM", "9:00 AM", "9:00 AM"]
-        },
-        {
-            name: "Ama Agyei",
-            durations: ["60 minutes", "90 minutes"],
-            availableTimes: ["9:00 AM", "9:00 AM"]
+    const [instructors, setInstructors] = useState([]);
+
+    useEffect(() => {
+    const fetchInstructors = async () => {
+        try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/trainers/`, {
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // if protected
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch trainers");
         }
-    ];
+
+        const data = await response.json();
+        setInstructors(data);
+        } catch (error) {
+        console.error("Error fetching trainers:", error);
+        }
+    };
+
+    fetchInstructors();
+    }, []);
 
     const handleSessionTypeSelect = (type) => {
         setSelectedSessionType(type);
@@ -54,16 +62,41 @@ export default function Booking() {
         setSelectedTime(time);
     };
 
-    const handleBookSession = () => {
-        // Handle booking logic here
-        console.log("Booking confirmed:", {
-            sessionType: selectedSessionType,
-            instructor: selectedInstructor,
+    const handleBookSession = async () => {
+        const bookingData = {
+            session_type: selectedSessionType,
+            instructor: selectedInstructor?.name,
             date: selectedDate,
-            time: selectedTime
-        });
-    setCurrentStep(3);
+            time: selectedTime,
+        };
+
+        console.log("Booking data:", bookingData);
+        console.log(localStorage.getItem("token"));
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/bookings/create/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Token ${localStorage.getItem("token")}`, // assuming JWT
+                },
+                body: JSON.stringify(bookingData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create booking");
+            }
+
+            const result = await response.json();
+            console.log("Booking confirmed:", result);
+
+            // move to confirmation step
+            setCurrentStep(3);
+        } catch (error) {
+            console.error("Error creating booking:", error);
+            alert("Failed to book session. Please try again.");
+        }
     };
+
 
     // Format date for display (convert YYYY-MM-DD to readable format)
     const formatDateForDisplay = (dateString) => {

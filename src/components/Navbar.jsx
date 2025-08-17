@@ -103,7 +103,7 @@ function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                   <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
                   
-                  <Link to="/my-classes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Classes</Link>
+                  <Link to="/sessions" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Classes</Link>
                   
                   <button
                     onClick={handleLogout}
@@ -147,7 +147,7 @@ function Navbar() {
           {user ? (
             <>
               <Link to="/profile" className="block text-gray-800 hover:text-red-600">Profile</Link>
-              <Link to="/my-classes" className="block text-gray-800 hover:text-red-600">My Classes</Link>
+              <Link to="/sessions" className="block text-gray-800 hover:text-red-600">My Classes</Link>
               {(userRole === 'instructor' || userRole === 'admin') ? (
                 <Link to="/instructor-dashboard" className="block text-gray-800 hover:text-red-600">Instructor Dashboard</Link>
               ) : (

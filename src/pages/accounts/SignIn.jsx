@@ -50,6 +50,7 @@ const SignIn = () => {
      
 
       localStorage.setItem('token', response.data.token); // Adjust based on the response structure
+      localStorage.setItem('role', response.data.role); // Store user role if available
       setMessage('Signin successful!');
       setTimeout(() => {
         window.location.href = '/';

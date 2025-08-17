@@ -1,0 +1,48 @@
+.sidemenu{
+        width: 20%;
+        height: 100%;
+        background: linear-gradient(to bottom right,rgb(0, 0, 0), #19191a);
+        color: white;
+        padding: 2rem 0rem;
+        .sidemenu-list{
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            .sidemenu-item{
+                padding: .3rem;
+                border-radius: 4px;
+                cursor: pointer;
+                
+                .sidemenu-link{
+                    display: flex;
+                    align-items: center;
+                    gap: .5rem;
+                    padding: .5rem;
+                    &:hover{
+                        background: rgba(255, 255, 255, 0.1);
+                    }
+                    .bx{
+                        font-size: 24px;
+                        background: red;
+                        padding: .5rem;
+                        border-radius: 50%;
+                        img{
+                            width: 24px
+                        }
+                    }
+                    div{
+                        display: flex;
+                        flex-direction: column;
+                        span{
+                            font: 1rem;
+                            font-weight: 500;
+                        }
+                        p{
+                            font-size: .7rem;
+                            color: #ccc;
+                        }
+                    }
+                }
+            }
+        }
+    }

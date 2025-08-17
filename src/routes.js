@@ -2,6 +2,7 @@ import { lazy } from 'react';
 
 
 
+
 const Landingpage = lazy(() => import('./pages/landingpage/LandingPage'))
 const SignIn = lazy(() => import('./pages/accounts/SignIn'))
 const SignUp = lazy(() => import('./pages/accounts/SignUp'))
@@ -15,6 +16,7 @@ const ProductDetail = lazy(() => import('./pages/products/ProductDetail'))
 const Cart = lazy(() => import('./pages/cart/Cart'))
 const Checkout = lazy(() => import('./pages/checkout/Checkout'))
 const DashboardPage = lazy(() => import('./pages/dashboard/Dashboard'))
+const SessionsPage = lazy(() => import('./pages/dashboard/Sessions'))
 const routes = [
     { path: '/', component: Landingpage},
     { path: '/signin', component: SignIn},
@@ -28,7 +30,8 @@ const routes = [
     { path: 'product/:productName', component: ProductDetail},
     { path: 'cart/', component: Cart},
     { path: 'checkout/', component: Checkout},
-    { path: 'dashboard/', component: DashboardPage}
+    { path: 'dashboard/', component: DashboardPage},
+    { path: 'sessions/', component: SessionsPage}
 ]
 
 export default routes;
