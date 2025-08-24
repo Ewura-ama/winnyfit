@@ -25,7 +25,7 @@ const SignIn = () => {
     // Check localStorage or context for authentication state
     const token = localStorage.getItem('token'); // Adjust based on your auth implementation
     if (token) {
-      navigate('/'); // Redirect to dashboard if token exists
+      navigate('/dashboard'); // Redirect to dashboard if token exists
     }
   }, [navigate]);
 
@@ -53,7 +53,7 @@ const SignIn = () => {
       localStorage.setItem('role', response.data.role); // Store user role if available
       setMessage('Signin successful!');
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }, 3000);
     } catch (err) {
       if (err.response && err.response.data) {

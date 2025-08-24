@@ -359,7 +359,7 @@ const Products = () => {
   return (
     <PageWrapper>
       <PageContainer>
-        <div className="container m-0  p-0">
+        <div className="m-0  p-0" >
           {/* Hero Section */}
           <section className="flex flex-col-2 md:flex-row items-center bg-black text-white p-6 rounded-lg mb-8 mt-1">
             <div className="md:w-1/2 md:pr-8 mb-6 md:mb-0">

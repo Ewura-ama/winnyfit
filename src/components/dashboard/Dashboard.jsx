@@ -5,7 +5,7 @@ import SideMenu from './SideMenu';
 import "../../styles/Dashboard.css";
 import axios from "axios";
 
-import defaultAvatar from '../../assets/John.jpg';
+import defaultAvatar from '../../assets/avatar.jpg';
 
 export default function Dashboard(){
     const navigate = useNavigate(); 
@@ -94,8 +94,8 @@ export default function Dashboard(){
                         </div>
                     </div>
                     <div className='profile-actions'>
-                        <button className='edit-profile'>Edit Profile</button>
-                        <button className='change-password'>Change Password</button>
+                        <button className='edit-profile' onClick={() => window.location.href = '/profile'}>View Profile</button>
+
                     </div>
                 </div>
 

@@ -45,6 +45,7 @@ const PageContainer = ({ children, className = "" }) => {
   return (
     <main 
       ref={containerRef}
+      
       className={`${baseClasses} ${className}`}
       tabIndex="-1" // Makes the element focusable for scrollIntoView
     >

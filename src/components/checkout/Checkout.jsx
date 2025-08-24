@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageContainer from '../products/PageContainer';
 import { getProductImage } from '../../utils/productImages';
+import axios from "axios";
 
 const Checkout = () => {
   const [cart, setCart] = useState([]);
+  
   const [step, setStep] = useState(1); // 1: Review, 2: Billing, 3: Payment, 4: Confirmation
   const [formData, setFormData] = useState({
     firstName: '',
@@ -35,8 +37,38 @@ const Checkout = () => {
       navigate('/cart');
     }
     setCart(savedCart);
-  }, [navigate]);
-  
+
+   
+    
+  }, []);
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await axios.get(`http://127.0.0.1:8000/api/customer/fetch`, {
+            headers: { Authorization: `Token ${token}` },
+          });
+          console.log("Hello", response)
+
+          setFormData(prev => ({
+            ...prev,
+            firstName: response.data.firstname || '',
+            lastName: response.data.lastname || '',
+            email: response.data.email || '',
+            phone: response.data.contact_number || '',
+          }));
+          console.log(formData)
+        }
+      } catch (err) {
+        console.error("Error fetching customer data:", err);
+        
+      } 
+    };
+    fetchCustomer();
+  }, [])
+
   // Calculate summary values
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const shipping = 20.00; // Fixed shipping fee
@@ -75,11 +107,39 @@ const Checkout = () => {
   const completeOrder = () => {
     // Here you would typically send the order to a backend
     // For now, we'll just clear the cart and show success
-    localStorage.setItem('cart', JSON.stringify([]));
-    setCart([]);
+    // Check if the user is AnonymousUser
+    
+    var user_email = formData.email;
+    var momonumber = formData.momoNumber;
+
+   
+
+    // Continue with payment logic
+    let handler = PaystackPop.setup({
+        key: 'pk_test_bd6a6eb65b4c2966f303176e3dc55b25a74799ac', // Replace with your public key
+        email: user_email, // Use the authenticated user's email
+        phone: momonumber,
+        amount: total * 100,
+        currency: "GHS",
+        ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+        onClose: function () {
+            alert('Window closed.');
+        },
+        callback: function (response) {
+            let message = 'Payment complete! Reference: ' + response.reference;
+            alert(message);
+            
+            navigate('/products');
+            localStorage.setItem('cart', JSON.stringify([]));
+            setCart([]);
+        }
+    });
+
+    handler.openIframe();
+    
     
     // Navigate to success page or show success message
-    navigate('/order-success');
+    
   };
   
   return (
@@ -670,7 +730,7 @@ const Checkout = () => {
                       onClick={completeOrder}
                       className="py-2 px-6 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-md"
                     >
-                      Place Order
+                      Make Payment
                     </button>
                   </div>
                 </div>
