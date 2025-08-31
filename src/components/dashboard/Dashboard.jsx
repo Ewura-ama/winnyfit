@@ -111,7 +111,7 @@ export default function Dashboard(){
                                 <p>{latestBooking.date}</p>
                                 <p>Starting at {latestBooking.start_time}</p>
                             </div>
-                            {latestBooking.can_join && (
+                            {/* {latestBooking.can_join && (
                                 userRole === "trainer" ? (
                                     <button onClick={() => handleTrainerJoin(booking)}>Join Now</button>
                                 ) : latestBooking.session_started ? (
@@ -121,7 +121,7 @@ export default function Dashboard(){
                                 ) : (
                                     <button disabled>Waiting for trainer...</button>
                                 )
-                                )}
+                                )} */}
                         </div>
                     ) : (
                         <p>No bookings available.</p>

@@ -22,7 +22,7 @@ export default function Classes(){
                         <div>
                             <span>In-Person</span>
                             <span className="active-type">Virtual</span>
-                            <a href="#" className="book-btn">Book Now</a>
+                            <a href="/booking" className="book-btn">Book Now</a>
                         </div>
                         
                     </div>

@@ -74,7 +74,10 @@ function Navbar() {
           <Link to="/products" className="text-gray-800 hover:text-red-600">Products</Link>
 
           {user && (
-            <Link to="/dashboard" className="text-gray-800 hover:text-red-600">Dashboard</Link>
+            <>
+              <Link to="/booking" className="text-gray-800 hover:text-red-600">Booking</Link>
+              <Link to="/dashboard" className="text-gray-800 hover:text-red-600">Dashboard</Link>
+            </>
           )}
 
           <Link to="/cart" className="text-gray-800 hover:text-red-600 relative">
